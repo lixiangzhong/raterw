@@ -10,26 +10,26 @@ import (
 func NewRateReader(r io.Reader, l rate.Limit, burst int) io.Reader {
 	return &RateReader{
 		R: r,
-		l: rate.NewLimiter(l, burst),
+		L: rate.NewLimiter(l, burst),
 	}
 }
 
 func AddRateReader(r io.Reader, l *rate.Limiter) io.Reader {
 	return &RateReader{
 		R: r,
-		l: l,
+		L: l,
 	}
 }
 
 type RateReader struct {
 	R io.Reader
-	l *rate.Limiter
+	L *rate.Limiter
 }
 
 func (r *RateReader) Read(p []byte) (n int, err error) {
 	lenp := len(p)
 	ctx := context.Background()
-	burst := r.l.Burst()
+	burst := r.L.Burst()
 	b := make([]byte, burst)
 	for {
 		size := lenp - n
@@ -38,7 +38,7 @@ func (r *RateReader) Read(p []byte) (n int, err error) {
 		} else {
 			size = burst
 		}
-		err = r.l.WaitN(ctx, size)
+		err = r.L.WaitN(ctx, size)
 		if err != nil {
 			return
 		}

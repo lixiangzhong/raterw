@@ -10,20 +10,20 @@ import (
 func NewRateReadCloser(r io.ReadCloser, l rate.Limit, burst int) io.ReadCloser {
 	return &RateReadCloser{
 		R: r,
-		l: rate.NewLimiter(l, burst),
+		L: rate.NewLimiter(l, burst),
 	}
 }
 
 func AddRateReadCloser(r io.ReadCloser, l *rate.Limiter) io.ReadCloser {
 	return &RateReadCloser{
 		R: r,
-		l: l,
+		L: l,
 	}
 }
 
 type RateReadCloser struct {
 	R io.ReadCloser
-	l *rate.Limiter
+	L *rate.Limiter
 }
 
 func (r *RateReadCloser) Close() error {
@@ -33,7 +33,7 @@ func (r *RateReadCloser) Close() error {
 func (r *RateReadCloser) Read(p []byte) (n int, err error) {
 	lenp := len(p)
 	ctx := context.Background()
-	burst := r.l.Burst()
+	burst := r.L.Burst()
 	b := make([]byte, burst)
 	for {
 		size := lenp - n
@@ -42,7 +42,7 @@ func (r *RateReadCloser) Read(p []byte) (n int, err error) {
 		} else {
 			size = burst
 		}
-		err = r.l.WaitN(ctx, size)
+		err = r.L.WaitN(ctx, size)
 		if err != nil {
 			return
 		}

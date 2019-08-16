@@ -23,3 +23,16 @@ func main() {
 	n, err := reader.Read(p)
 	log.Println(string(p), n, err)
 ```
+
+# AddRate
+```go
+import ( 
+		"github.com/lixiangzhong/raterw"
+		"golang.org/x/time/rate"
+	)
+```
+```go
+	l := rate.NewLimiter(10, 20)
+	rr := raterw.AddRateWriter(w, l)
+	rw := raterw.AddRateReader(r, l)
+```

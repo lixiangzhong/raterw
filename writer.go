@@ -14,6 +14,13 @@ func NewRateWriter(w io.Writer, l rate.Limit, burst int) io.Writer {
 	}
 }
 
+func AddRateWriter(w io.Writer, l *rate.Limiter) io.Writer {
+	return &RateWriter{
+		w: w,
+		l: l,
+	}
+}
+
 type RateWriter struct {
 	w io.Writer
 	l *rate.Limiter

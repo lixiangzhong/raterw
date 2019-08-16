@@ -7,26 +7,30 @@ import (
 	"golang.org/x/time/rate"
 )
 
-func NewRateReader(r io.Reader, l rate.Limit, burst int) io.Reader {
-	return &RateReader{
+func NewRateReadCloser(r io.ReadCloser, l rate.Limit, burst int) io.ReadCloser {
+	return &RateReadCloser{
 		R: r,
 		l: rate.NewLimiter(l, burst),
 	}
 }
 
-func AddRateReader(r io.Reader, l *rate.Limiter) io.Reader {
-	return &RateReader{
+func AddRateReadCloser(r io.ReadCloser, l *rate.Limiter) io.ReadCloser {
+	return &RateReadCloser{
 		R: r,
 		l: l,
 	}
 }
 
-type RateReader struct {
-	R io.Reader
+type RateReadCloser struct {
+	R io.ReadCloser
 	l *rate.Limiter
 }
 
-func (r *RateReader) Read(p []byte) (n int, err error) {
+func (r *RateReadCloser) Close() error {
+	return r.R.Close()
+}
+
+func (r *RateReadCloser) Read(p []byte) (n int, err error) {
 	lenp := len(p)
 	ctx := context.Background()
 	burst := r.l.Burst()
